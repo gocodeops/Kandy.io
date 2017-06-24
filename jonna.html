@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <fieldset>
+        <legend>Send Messages</legend>
+
+        <!-- User input: Recipient and message text fields. -->
+        Recipient: <input type="text" id="recipient" /> Message: <textarea id="messageBox"> </textarea>
+
+        <!-- User input: Send button. -->
+        <input type="button" value="Send Message" onclick="sendMessage();" />
+    </fieldset>
+
+    <fieldset>
+        <legend>Messages</legend>
+        <div id="messages"> </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Chat</legend>
+        <div id="chat-messages"> </div>
+    </fieldset>
+
+    <script src="https://kandy-portal.s3.amazonaws.com/public/javascript/kandy/2.10.1/kandy.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js"></script>
+
+    <script>
+        /**
+         * Kandy.io Chat Messages Demo
+         * View this tutorial and others at https://developer.kandy.io/tutorials
+         */
+
+        // Variables for logging in.
+        var projectAPIKey = "DAKa6ff6fb3bf5c40a18503eeeda2f5d854";
+        var username = "jonna@codeops.hotmail.com";
+        var password = "1utveleos1";
+
+        // Setup Kandy to receive messages.
+        kandy.setup({
+            listeners: {
+                message: onMessageReceived
+            }
+        });
+
+        kandy.login(projectAPIKey, username, password, onLoginSuccess, onLoginFailure);
+
+        // What to do on a successful login.
+        function onLoginSuccess() {
+            log("Login was successful.");
+        }
+
+        // What to do on a failed login.
+        function onLoginFailure() {
+            log("Login failed. Make sure you input the user's credentials!");
+        }
+
+        // Utility function for appending messages to the message div.
+        function log(message) {
+            document.getElementById("messages").innerHTML += "<div>" + message + "</div>";
+        }
+
+        // Gathers the user's input and sends a message to the recipient.
+        function sendMessage() {
+            var recipient = document.getElementById("recipient").value;
+            var message = document.getElementById("messageBox").value;
+
+            kandy.messaging.sendIm(recipient, message, onSendSuccess, onSendFailure);
+        }
+
+        // What to do on a successful send message.
+        function onSendSuccess(message) {
+            // Display the message as outgoing.
+            var recipient = message.destination.split("@")[0];
+            // Create the message element. Use Lodash to escape the message for security purposes.
+            var element = "<div>Outgoing (" + recipient + "): " + _.escape(message.message.text) + "</div>";
+            document.getElementById("chat-messages").innerHTML += element;
+        }
+
+        // What to do on a failed send message.
+        function onSendFailure() {
+            log("Send Message failed.");
+        }
+
+        /**
+         * Called when the `message` event is triggered.
+         * Receives the message object as a parameter.
+         */
+        function onMessageReceived(message) {
+            // Display the message as incoming.
+            var sender = message.sender.user_id;
+            // Create the message element. Use Lodash to escape the message for security purposes.
+            var element = "<div>Incoming (" + sender + "): " + _.escape(message.message.text) + "</div>"
+            document.getElementById("chat-messages").innerHTML += element;
+        }
+    </script>
+</body>
+
+</html>
